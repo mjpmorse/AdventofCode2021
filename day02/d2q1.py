@@ -1,7 +1,7 @@
 import numpy as np
 from icecream import ic
 
-with open('day02/data_q2.txt', 'r') as f:
+with open('data/data_q2.txt', 'r') as f:
     data = np.loadtxt(f, dtype=str)
     directions = data[:, 1].astype(int)
     command = data[:, 0]

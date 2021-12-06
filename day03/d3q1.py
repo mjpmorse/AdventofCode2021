@@ -8,7 +8,7 @@ epsilon = bin(1)
 # exclusive or
 data = []
 data_ = []
-with open('day03/data_q3.txt', 'r') as f:
+with open('data/data_q3.txt', 'r') as f:
     data_ = np.loadtxt(f, dtype=str)
 if False:
     data_ = [

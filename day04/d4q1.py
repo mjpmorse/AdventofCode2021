@@ -5,7 +5,7 @@ calls = []
 boards = []
 boards.append([])
 
-with open('day04/data_q4.txt', 'r') as f:
+with open('data/data_q4.txt', 'r') as f:
     # pull out the first line
     calls.append(f.readline())
     calls = calls[0].split(',')

@@ -6,7 +6,7 @@ window = np.ones(window_size, dtype=int)
 
 data = np.array([199, 200, 208, 210, 200, 207, 240, 269, 260, 263])
 
-with open('day01/data_q1.txt', 'r') as f:
+with open('data/data_q1.txt', 'r') as f:
     data = np.loadtxt(f, dtype=int)
 
 data_sum = np.convolve(data, window, 'valid')

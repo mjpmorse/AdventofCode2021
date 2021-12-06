@@ -2,7 +2,7 @@ aim = 0
 depth = 0
 position = 0
 
-with open('day02/data_q2.txt', 'r') as f:
+with open('data/data_q2.txt', 'r') as f:
     for line in f:
         command = line.split(' ')
         if command[0] == 'down':
