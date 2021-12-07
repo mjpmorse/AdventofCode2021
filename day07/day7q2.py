@@ -13,22 +13,15 @@ PossiblePositionMin = min(crabList)
 PossiblePositionMax = max(crabList)
 
 
-def crabEngineering(positionChange: int):
-    fuelCost = 0
-    for change in range(1, positionChange + 1):
-        fuelCost += change
-    return fuelCost
-
-
 globalIntergerMin = PossiblePositionMax - PossiblePositionMin
-globalFuelMin = globalIntergerMin * crabEngineering(globalIntergerMin)
+globalFuelMin = (globalIntergerMin**2 + globalIntergerMin) * globalIntergerMin
 
 
 def absoluteResidual(initialPositions: List[int], middlePosition: int):
     totalAbsoluteResidual = 0
     for position in initialPositions:
         fuelCost = abs(position - middlePosition)
-        totalAbsoluteResidual += crabEngineering(fuelCost)
+        totalAbsoluteResidual += int((fuelCost**2 + fuelCost)/2)
     return totalAbsoluteResidual
 
 
