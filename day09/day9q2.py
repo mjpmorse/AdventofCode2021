@@ -1,6 +1,5 @@
 from icecream import ic
 from typing import List, Tuple
-import numpy as np
 debug = False
 heightMap = []
 
