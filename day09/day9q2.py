@@ -96,12 +96,9 @@ while any([1 in row for row in basinMap]):
             if element == 1:
                 startingY = y
                 startingX = x
-                break
-        if 1 in basinMap[x]:
-            break
-    basinList.append(
-        zerosAround(basinMap, startingX, startingY)
-        )
+                basinList.append(
+                    zerosAround(basinMap, startingX, startingY)
+                    )
     ic(basinMap) if debug else ""
     if iterations == maxBasinNumber:
         raise Exception("Too many basins")
