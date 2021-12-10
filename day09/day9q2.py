@@ -86,18 +86,18 @@ ic(basinMap) if debug else ""
 iterations = 0
 basinList = []
 maxBasinNumber = len(basinMap) * len(basinMap[0])
+startingX = 0
+startingY = 0
 while any([1 in row for row in basinMap]):
     iterations += 1
     # find any value of 1 to start
-    startingX = 0
-    startingY = 0
-    for x, row in enumerate(basinMap):
-        for y, element in enumerate(row):
+    for x in range(startingX, len(basinMap)):
+        for y, element in enumerate(basinMap[x]):
             if element == 1:
                 startingY = y
                 startingX = x
                 break
-        if 1 in row:
+        if 1 in basinMap[x]:
             break
     basinList.append(
         zerosAround(basinMap, startingX, startingY)
