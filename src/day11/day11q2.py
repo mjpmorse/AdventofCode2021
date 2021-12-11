@@ -36,23 +36,19 @@ def timeStep(octopusMap):
                     alreadyFlashed[x][y] = 1
                     ic(f"row: {x} column: {y} just fired") if debug else ""
 
-                    # TODO: can this be done in a loop?
-                    if x != 0:
-                        octopusMap[x - 1][y] += 1
-                    if x != (len(octopusMap) - 1):
-                        octopusMap[x + 1][y] += 1
-                    if y != 0:
-                        octopusMap[x][y - 1] += 1
-                    if y != (len(row) - 1):
-                        octopusMap[x][y + 1] += 1
-                    if x != 0 and y != 0:
-                        octopusMap[x - 1][y - 1] += 1
-                    if x != 0 and y != (len(row) - 1):
-                        octopusMap[x - 1][y + 1] += 1
-                    if x != (len(octopusMap) - 1) and y != 0:
-                        octopusMap[x + 1][y - 1] += 1
-                    if x != (len(octopusMap) - 1) and y != (len(row) - 1):
-                        octopusMap[x + 1][y + 1] += 1
+                    for xOffset in [0, 1, -1]:
+                        for yOffset in [0, 1, -1]:
+                            if xOffset == 0 and yOffset == 0:
+                                # we do not want to do anything
+                                # on this square.
+                                continue
+                            condition = (
+                                x + xOffset in range(0, len(octopusMap))
+                                and
+                                y + yOffset in range(0, len(row))
+                            )
+                            if condition:
+                                octopusMap[x + xOffset][y + yOffset] += 1
 
         if numberOfCycles > len(octopusMap)*len(octopusMap[0]):
             raise Exception("too many chain reactions")
@@ -76,7 +72,7 @@ while True:
     if timeStep(octopusMap)[1]:
         break
     if count > 5000:
-        raise Exception('More than 500 steps')
+        raise Exception('More than 5000 steps')
 
 
 statement = (
