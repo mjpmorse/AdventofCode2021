@@ -6,12 +6,12 @@ def test_timeStep():
     octopusMap = []
     octopusMapSteps = []
 
-    with open(f'data/data_q11_dummy.txt', 'r') as f:
+    with open('data/data_q11_dummy.txt', 'r') as f:
         for line in f:
             line = [int(x) for x in line.strip()]
             octopusMap.append(line)
 
-    with open(f'data/data_q11_dummy_steps.txt', 'r') as f:
+    with open('data/data_q11_dummy_steps.txt', 'r') as f:
         octopusMapTmp = []
         for line in f:
             line = line.strip()
@@ -26,7 +26,7 @@ def test_timeStep():
     fired, allfired = timeStep(octopusMap)
 
     assert octopusMap == octopusMapSteps[0]
-    assert allfired == False
+    assert allfired is False
     assert fired == 0
 
     for count in range(0, 99):
@@ -35,7 +35,7 @@ def test_timeStep():
     assert fired == 1656
 
     octopusMap = []
-    with open(f'data/data_q11_dummy.txt', 'r') as f:
+    with open('data/data_q11_dummy.txt', 'r') as f:
         for line in f:
             line = [int(x) for x in line.strip()]
             octopusMap.append(line)
