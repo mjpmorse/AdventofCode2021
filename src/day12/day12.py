@@ -1,7 +1,8 @@
-from icecream import ic 
-from typing import Dict
+from icecream import ic
 
 debug = False
+
+
 def readCaveConnections(file):
     caveConnections = []
     with open(file, 'r') as f:
