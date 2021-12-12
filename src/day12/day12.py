@@ -12,56 +12,49 @@ def readCaveConnections(file):
     return caveConnections
 
 
-class Graph:
+class CaveGraph:
     def __init__(self, vertices):
-        self.vertices = vertices
-        self.graph = {}
+        uniqueNodes = set([x[0] for x in vertices]).union(
+            set(x[1] for x in vertices)
+            )
+        self.edgeDict = {x: [] for x in uniqueNodes}
+
+        for connection in vertices:
+            self.edgeDict[connection[0]].append(connection[1])
+            self.edgeDict[connection[1]].append(connection[0])
+
         self.allPaths = []
 
-    def addEdge(self, u, v):
-        if u not in self.graph:
-            self.graph[u] = []
-        self.graph[u].append(v)
+    def __transverseGraph(self, nextNode, endNode, visited, path):
+        path.append(nextNode)
+        visited[nextNode] = True
 
-    def __findPaths(self, u, d, visited, path):
-        path.append(u)
-        visited[u] = True
-
-        if u == d:
+        if nextNode == endNode:
             self.allPaths.append([x for x in path])
             if debug:
                 ic(path)
 
         else:
-            for i in self.graph[u]:
+            for node in self.edgeDict[nextNode]:
                 condition = (
-                    visited[i] and i.islower()
+                    visited[node] and node.islower()
                 )
                 if not condition:
-                    self.__findPaths(i, d, visited, path)
+                    self.__transverseGraph(node, endNode, visited, path)
 
         path.pop()
-        visited[u] = False
+        visited[nextNode] = False
 
-    def findAllPaths(self, s, d):
-        visited = {x: False for x in self.graph.keys()}
+    def findAllPaths(self, start, end):
+        visited = {x: False for x in self.edgeDict.keys()}
         path = []
-        self.__findPaths(s, d, visited, path)
+        self.__transverseGraph(start, end, visited, path)
 
         return self.allPaths
 
 
 def findPaths(caveConnections):
-
-    uniqueNodes = set([x[0] for x in caveConnections]).union(
-        set(x[1] for x in caveConnections)
-        )
-
-    g = Graph(len(uniqueNodes))
-    for connection in caveConnections:
-        g.addEdge(connection[0], connection[1])
-        g.addEdge(connection[1], connection[0])
-
+    g = CaveGraph(caveConnections)
     allPaths = g.findAllPaths('start', 'end')
     return allPaths
 
