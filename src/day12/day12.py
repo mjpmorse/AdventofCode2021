@@ -1,4 +1,5 @@
 from icecream import ic
+from typing import List, Tuple
 
 debug = False
 
@@ -14,21 +15,37 @@ def readCaveConnections(file):
 
 
 class CaveGraph:
-    def __init__(self, vertices):
-        uniqueNodes = set([x[0] for x in vertices]).union(
-            set(x[1] for x in vertices)
+    def __init__(self, edges: List[Tuple], numVisits={}):
+        """ A graph representation of the cave.
+        The graph is adirectional based the list of edges.
+        Nodes with lowercase names can be visited one in a transversal
+        Nodes with uppercase names can be visited any number of times.
+        This can be overridden by passing the name and number of visits
+        in numVisits dictionary.
+
+        Args:
+            edges (List[Tuple]): List of the edges in tuple form.
+            numVisits (dict, optional): Override default visit behavior.
+                e.g. {'A': 1} would only allow node 'A' to be visited once.
+                Defaults to {}.
+        """
+        uniqueNodes = set([x[0] for x in edges]).union(
+            set(x[1] for x in edges)
             )
         self.edgeDict = {x: [] for x in uniqueNodes}
 
-        for connection in vertices:
+        for connection in edges:
             self.edgeDict[connection[0]].append(connection[1])
             self.edgeDict[connection[1]].append(connection[0])
 
         self.allPaths = []
+        self.maxVisits = {x: 1 if x.islower() else -1 for x in uniqueNodes}
+        for node, visits in numVisits.items():
+            self.maxVisits[node] = visits
 
     def __transverseGraph(self, nextNode, endNode, visited, path):
         path.append(nextNode)
-        visited[nextNode] = True
+        visited[nextNode] += 1
 
         if nextNode == endNode:
             self.allPaths.append([x for x in path])
@@ -38,13 +55,14 @@ class CaveGraph:
         else:
             for node in self.edgeDict[nextNode]:
                 condition = (
-                    visited[node] and node.islower()
+                    visited[node] < self.maxVisits[node] or
+                    self.maxVisits[node] == -1
                 )
-                if not condition:
+                if condition:
                     self.__transverseGraph(node, endNode, visited, path)
 
         path.pop()
-        visited[nextNode] = False
+        visited[nextNode] -= 1
 
     def findAllPaths(self, start, end):
         visited = {x: False for x in self.edgeDict.keys()}
@@ -54,8 +72,8 @@ class CaveGraph:
         return self.allPaths
 
 
-def findPaths(caveConnections):
-    g = CaveGraph(caveConnections)
+def findPaths(caveConnections, **kwargs):
+    g = CaveGraph(caveConnections, **kwargs)
     allPaths = g.findAllPaths('start', 'end')
     return allPaths
 
@@ -86,21 +104,9 @@ def partTwo(inputData):
     smallCaves.remove('end')
 
     for cave in smallCaves:
-        newName = f'{cave}_repeatvisit'
-        caveConnTmp = [x for x in caveConnections]
-        for connection in caveConnections:
-            if cave == connection[0]:
-                caveConnTmp.append((newName, connection[1]))
-            if cave == connection[1]:
-                caveConnTmp.append((connection[0], newName))
-        ic(caveConnTmp) if debug else ""
-        allPathsLocal = findPaths(caveConnTmp)
-
-        for position, path in enumerate(allPathsLocal):
-            if newName in path:
-                allPathsLocal[position] = [x.split('_')[0] for x in path]
-
-            allPaths.add(tuple(allPathsLocal[position]))
+        allPathsLocal = findPaths(caveConnections, numVisits={cave: 2})
+        for path in allPathsLocal:
+            allPaths.add(tuple(path))
 
         ic(allPathsLocal) if debug else ""
 
