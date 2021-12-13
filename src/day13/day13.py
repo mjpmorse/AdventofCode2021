@@ -1,4 +1,3 @@
-from icecream import ic
 from typing import List, Tuple
 
 debug = True
@@ -106,10 +105,11 @@ def partTwo(file):
         dotMatrix = foldDotMatrix(dotMatrix, instruction)
 
     for row in dotMatrix:
-        row = [str(x).replace('1', '#') for x in row]
-        row = [x.replace('0', ' ') for x in row]
+        code = [str(x).replace('1', '#') for x in row]
+        code = [x.replace('0', ' ') for x in code]
+        print(''.join(code))
 
-        print(''.join(row))
+    return dotMatrix
 
 
 partOne('data/data_q13.txt')

@@ -1,5 +1,5 @@
 from day13 import readInstructions, makeDotMatrix
-from day13 import foldDotMatrix, partOne
+from day13 import foldDotMatrix, partOne, partTwo
 
 
 def test_readInstructions():
@@ -48,3 +48,16 @@ def test_foldDotMatrix():
 
 def test_partOne():
     assert partOne('data/data_q13_dummy.txt') == 17
+
+
+def test_partTwo():
+    dotMatrix = partTwo('data/data_q13_dummy.txt')
+    assert len(dotMatrix) == 7
+    assert len(dotMatrix[0]) == 5
+    assert dotMatrix[0] == [1, 1, 1, 1, 1]
+    assert dotMatrix[1] == [1, 0, 0, 0, 1]
+    assert dotMatrix[2] == [1, 0, 0, 0, 1]
+    assert dotMatrix[3] == [1, 0, 0, 0, 1]
+    assert dotMatrix[4] == [1, 1, 1, 1, 1]
+    assert dotMatrix[5] == [0, 0, 0, 0, 0]
+    assert dotMatrix[6] == [0, 0, 0, 0, 0]
