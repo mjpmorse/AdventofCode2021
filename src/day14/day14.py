@@ -1,86 +1,85 @@
 from icecream import ic
+from typing import Dict
 
-debug = True
 
 def readTemplate(file):
     with open(file, 'r') as f:
-        initialTemplate = f.readline().strip()
+        init = f.readline().strip()
+        ends = (init[0], init[-1])
+        initDict = {}
         polymerDict = {}
         f.readline()
         for line in f:
             line = line.strip()
             line = line.split(' -> ')
             polymerDict[line[0]] = line[1]
-    return initialTemplate, polymerDict
+            initDict[line[0]] = 0
+        for pos, letter in enumerate(init[:-1]):
+            initDict[init[pos:pos + 2]] += 1
+
+    return initDict, polymerDict, ends
 
 
-def polymerization(polymer, insertion):
-    newPolymer = polymer[0]
-    for pos, letter in enumerate(polymer[:-1]):
-        monomerToAdd = insertion[polymer[pos:pos + 2]]
-        toAdd = f'{monomerToAdd}{polymer[pos+1]}'
-        newPolymer = newPolymer + toAdd
+def polymerization(polymer: Dict, insertion: Dict) -> Dict:
+    newPolymer = {key: 0 for key in insertion.keys()}
+    for pair, occur in polymer.items():
+        toInsert = insertion[pair]
+        leftPolymer = f'{pair[0]}{toInsert}'
+        rightPolymer = f'{toInsert}{pair[1]}'
+        newPolymer[leftPolymer] += occur
+        newPolymer[rightPolymer] += occur
+
     return newPolymer
 
 
-def countOccurrences(polymer):
-    countDict = {}
-    uniqueLetters = set(polymer)
-    for letter in uniqueLetters:
-        countDict[letter] = polymer.count(letter)
+def countOccurrences(polymer: Dict, ends=()) -> Dict:
+    allLetters = ''.join([x for x in polymer.keys()])
+    uniqueLetters = set(allLetters)
+    countDict = {lett: 0 for lett in uniqueLetters}
+
+    for pair, count in polymer.items():
+        firstLetter = pair[0]
+        secondLetter = pair[1]
+        countDict[firstLetter] += count
+        countDict[secondLetter] += count
+    for letter, count in countDict.items():
+        if ends[0] == ends[1]:
+            toRemove = 2
+        else:
+            toRemove = 1
+        if letter in ends:
+            countDict[letter] = (count - toRemove) // 2 + toRemove
+        else:
+            countDict[letter] = (count) // 2
+
     return countDict
 
 
-def partOne(data):
-    polymer, polyDict = readTemplate(data)
+def partOne(data, steps):
+    polymer, polyDict, ends = readTemplate(data)
 
-    for _ in range(10):
+    for _ in range(steps):
         polymer = polymerization(polymer, polyDict)
 
-    occurrences = countOccurrences(polymer)
-    mostOften = ['', 0]
-    leastOften = ['', len(polymer)]
-    for monomer, count in occurrences.items():
-        if count > mostOften[1]:
-            mostOften[1] = count
-            mostOften[0] = monomer
-        elif count < leastOften[1]:
-            leastOften[1] = count
-            leastOften[0] = monomer
+    countDict = countOccurrences(polymer, ends)
+    mostOften = 'B'
+    leastOften = 'B'
 
-    diff = mostOften[1] - leastOften[1]
+    for monomer, count in countDict.items():
+        if count > countDict[mostOften]:
+            mostOften = monomer
+        elif count < countDict[leastOften]:
+            leastOften = monomer
+
+    diff = countDict[mostOften] - countDict[leastOften]
     statement = (
         'The difference between the most  and least often '
-        f'occurring monomer is ({mostOften[0]}, {leastOften[0]}) {diff}'
+        f'occurring monomer is ({mostOften}, {leastOften}) {diff}'
     )
     print(statement)
     return diff
 
 
-def partTwo(data):
-    polymer, polyDict = readTemplate(data)
-
-    for _ in range(40):
-        polymer = polymerization(polymer, polyDict)
-
-    occurrences = countOccurrences(polymer)
-    mostOften = ['', 0]
-    leastOften = ['', len(polymer)]
-    for monomer, count in occurrences.items():
-        if count > mostOften[1]:
-            mostOften[1] = count
-            mostOften[0] = monomer
-        elif count < leastOften[1]:
-            leastOften[1] = count
-            leastOften[0] = monomer
-
-    diff = mostOften[1] - leastOften[1]
-    statement = (
-        'The difference between the most  and least often '
-        f'occurring monomer is ({mostOften[0]}, {leastOften[0]}) {diff}'
-    )
-    print(statement)
-    return diff
-
-
-partOne('data/data_q14.txt')
+if __name__ == '__main__':
+    partOne('data/data_q14.txt', 10)
+    partOne('data/data_q14.txt', 40)
