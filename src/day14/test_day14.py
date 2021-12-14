@@ -27,6 +27,7 @@ def test_polymerization():
         else:
             assert value == 1
 
+
 def test_countOccurrences():
     template, polyDict, ends = readTemplate('data/data_q14_dummy.txt')
     polymer = polymerization(template, polyDict)
