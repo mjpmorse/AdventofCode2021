@@ -27,6 +27,9 @@ class CaveNode:
     def get_cost(self):
         return self.value
 
+    def __hash__(self) -> int:
+        return hash(repr(self))
+
 
 def findCavePath(caveMap, start, end):
 
@@ -54,7 +57,7 @@ def findCavePath(caveMap, start, end):
                 currentIndex = index
 
         openList.pop(currentIndex)
-        closedList.add(currentNode.position)
+        closedList.add(currentNode)
 
         if currentNode == endNode:
             path = []
@@ -96,7 +99,7 @@ def findCavePath(caveMap, start, end):
         # Loop through children
         for child in children:
             # Child is on the closed list
-            if child.position in closedList:
+            if child in closedList:
                 continue
 
             # Create the f, g, and h values
