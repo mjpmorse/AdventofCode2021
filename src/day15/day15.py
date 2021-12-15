@@ -24,6 +24,9 @@ class CaveNode:
     def __repr__(self) -> str:
         return f'({self.position[0]}, {self.position[1]})'
 
+    def __lt__(self, __o: object):
+        return self.f < __o.f
+
     def get_cost(self):
         return self.value
 
@@ -49,14 +52,9 @@ def findCavePath(caveMap, start, end):
     openList.append(startNode)
 
     while len(openList) > 0:
+        openList.sort(reverse=False)
         currentNode = openList[0]
-        currentIndex = 0
-        for index, node in enumerate(openList):
-            if getattr(node, 'f') < getattr(currentNode, 'f'):
-                currentNode = node
-                currentIndex = index
-
-        openList.pop(currentIndex)
+        openList.pop(0)
         closedList.add(currentNode)
 
         if currentNode == endNode:
