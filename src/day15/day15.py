@@ -104,6 +104,9 @@ def findCavePath(caveMap, start, end):
             setattr(child, 'f', getattr(child, 'g') + getattr(child, 'h'))
             # Child is already in the open list
             if child in openList:
+                position = openList.index(child)
+                if openList[position].g > child.g:
+                    openList[position] = child
                 continue
             # Add the child to the open list
             openList.append(child)
