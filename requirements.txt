@@ -2,3 +2,5 @@ numpy
 icecream
 pygame
 pytest
+ast
+copy
