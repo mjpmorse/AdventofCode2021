@@ -102,22 +102,6 @@ def explodeNumber(snailNumber):
     return snailNumber
 
 
-def splitNumber(snailNumber: List) -> List:
-    for pos, number in enumerate(snailNumber):
-        if isinstance(number, int):
-            if number >= 10:
-                if number % 2 == 0:
-                    snailNumber[pos] = [number // 2, number // 2]
-                else:
-                    snailNumber[pos] = [number // 2, number // 2 + 1]
-                break
-
-        else:
-            snailNumber[pos] = splitNumber(snailNumber[pos])
-
-    return snailNumber
-
-
 def magnitude_helper(number: List) -> List:
 
     if all([isinstance(x, int) for x in number]):
@@ -141,6 +125,24 @@ def magnitude(number: List) -> int:
     return number
 
 
+def splitNumber(snailNumber: List, hasSplit=False) -> List:
+    for pos, number in enumerate(snailNumber):
+        if hasSplit:
+            break
+        if isinstance(number, int):
+            if number >= 10:
+                hasSplit = True
+                if number % 2 == 0:
+                    snailNumber[pos] = [number // 2, number // 2]
+                else:
+                    snailNumber[pos] = [number // 2, number // 2 + 1]
+                break
+
+        else:
+            snailNumber[pos], hasSplit = splitNumber(snailNumber[pos], hasSplit)
+
+    return (snailNumber, hasSplit)
+
 class SnailFishNumber:
     def __init__(self, number: str):
         self.snail_number = number
@@ -163,7 +165,7 @@ class SnailFishNumber:
     def splitNumber(self):
         number = literal_eval(self.snail_number)
         number2 = copy.deepcopy(number)
-        number = splitNumber(number)
+        number = splitNumber(number)[0]
         self.snail_number = str(number).replace(" ", '')
         if number2 == number:
             self.changed = False
@@ -186,7 +188,7 @@ def addNumbers(aOrg: SnailFishNumber,
         counter += 1
         newNumber.explode()
         if newNumber.changed:
-            # print(f'after explode: {len(newNumber.snail_number)}')
+            # print(f'after explode: {(newNumber.snail_number)}')
             # sleep(1)
             continue
         newNumber.splitNumber()
@@ -218,9 +220,30 @@ def partOne(data):
     print(statement)
     return mag
 
+def partTwo(data):
+    hw = readHomeWork(data)
+    highest_sum = 0
+    for num1 in range(0, len(hw)):
+        for num2 in range(num1 + 1, len(hw)):
+            a = SnailFishNumber(hw[num1])
+            b = SnailFishNumber(hw[num2])
+            c = addNumbers(a, b)
+            magc = magnitude(eval(c.snail_number))
+            d = addNumbers(b, a)
+            magd = magnitude(eval(d.snail_number))
+            if magc > highest_sum:
+                highest_sum = magc
+            if magd > highest_sum:
+                highest_sum = magd
+
+    statement = (
+        f'The greatest magnitude of the hw is {highest_sum}'
+    )
+    print(statement)
+    return highest_sum
+
 
 if __name__ == '__main__':
-    partOne('data/data_q18_dummy.txt')
-
-
+    # partOne('data/data_q18.txt')
+    partTwo('data/data_q18.txt')
 
