@@ -13,119 +13,108 @@ def readInput(file: str):
 
     return algorithm, image
 
+class Image:
+    def __init__(self, image: List[str], algo: str):
+        self.image = image
+        self.orginalImage = copy.deepcopy(image)
+        self.algo = algo
+        self.nEnh = 0
+        
 
-def convertToDecimal(pixels: str):
-    pixels = pixels.replace('.', '0')
-    pixels = pixels.replace('#', '1')
-    result = int(pixels, 2)
-    return result
+    def convertToDecimal(self, pixels: str):
+        pixels = pixels.replace('.', '0')
+        pixels = pixels.replace('#', '1')
+        result = int(pixels, 2)
+        return result
 
-
-def enhanceImage(inputImage_: List[List[str]], algo: str):
-    outputImage = []
-    inputImage = copy.deepcopy(inputImage_)
-    toPady = '.' * len(inputImage)
-    inputImage.append(toPady)
-    inputImage.insert(0, toPady)
-    yMax = len(inputImage) - 1
-    farthestLeft = 99999
-    farthestRight = 0
-    for y, in range(1, len(inputImage)):
-        row = inputImage[y] 
-        row = '.' + row + '.'
-        for x, in range(1, len(row))
-            # left
-            if x != 0:
+    def enhanceImage(self):
+        outputImage = []
+        inputImage = copy.deepcopy(self.image)
+        if self.nEnh % 2 == 1 and self.algo[0] == '#':
+            padWith = '#'
+        else:
+            padWith = '.'
+        self.nEnh += 1
+        toPad = padWith * len(inputImage)
+        inputImage.append(toPad)
+        inputImage.append(toPad)
+        inputImage.insert(0, toPad)
+        inputImage.insert(0, toPad)
+        farthestLeft = 99999
+        farthestRight = 0
+        for y, row in enumerate(inputImage):
+            row = padWith + padWith + row + padWith + padWith
+            inputImage[y] = row
+        for y in range(1, len(inputImage) - 1):
+            outputrow = ''
+            row = inputImage[y]
+            for x in range(1, len(row) - 1):
+                pixel = inputImage[y][x]
                 left = inputImage[y][x - 1]
-            else:
-                left = '.'
-            # above
-            if y != 0:
                 upper = inputImage[y - 1][x]
-            else:
-                upper = '.'
-            # upper left
-            if x != 0 and y != 0:
                 upperLeft = inputImage[y - 1][x - 1]
-            else:
-                upperLeft = '.'
-            # upper right
-            if x != xMax and y != 0:
                 upperRight = inputImage[y - 1][x + 1]
-            else:
-                upperRight = '.'
-            # right
-            if x != xMax:
                 right = inputImage[y][x + 1]
-            else:
-                right = '.'
-            # lower right
-            if x != xMax and y != yMax:
                 lowerRight = inputImage[y + 1][x + 1]
-            else:
-                lowerRight = '.'
-            # lower
-            if y != yMax:
                 lower = inputImage[y + 1][x]
-            else:
-                lower = '.'
-            # lower left
-            if y != yMax and x != 0:
                 lowerLeft = inputImage[y + 1][x - 1]
-            else:
-                lowerLeft = '.'
 
-            ninePixels = (
-                upperLeft + upper + upperRight +
-                left + pixel + right +
-                lowerLeft + lower + lowerRight)
+                ninePixels = (
+                    upperLeft + upper + upperRight +
+                    left + pixel + right +
+                    lowerLeft + lower + lowerRight)
 
-            algoLoc = convertToDecimal(ninePixels)
-            outputrow = outputrow + algo[algoLoc]
-        localLeft = outputrow.find('#')
-        localRight = outputrow[::-1].find('#')
-        if localRight != -1:
-            localRight = len(row) - localRight
-            if localRight > farthestRight:
-                farthestRight = localRight
-        if localLeft != -1:
-            if localLeft < farthestLeft:
-                farthestLeft = localLeft
-        outputImage.append(outputrow)
+                algoLoc = self.convertToDecimal(ninePixels)
+                outputrow = outputrow + self.algo[algoLoc]
+            '''
+            localLeft = outputrow.find('#')
+            localRight = outputrow[::-1].find('#')
+            if localRight != -1:
+                localRight = len(row) - localRight
+                if localRight > farthestRight:
+                    farthestRight = localRight
+            if localLeft != -1:
+                if localLeft < farthestLeft:
+                    farthestLeft = localLeft
+            outputImage.append(outputrow)
+            '''
+            outputImage.append(outputrow)
 
-    anyontop = outputImage[0].find('#')
-    if anyontop == -1:
-        outputImage.pop(0)
-    anyonbottom = outputImage[-1].find('#')
-    if anyonbottom == -1:
-        outputImage.pop(-1)
-    for n, row in enumerate(outputImage):
-        outputImage[n] = row[farthestLeft:farthestRight]
-    # print(outputImage)
-    return outputImage
+        self.image = outputImage
 
+    def countLitPixels(self):
+        lit = 0
+        for row in self.image:
+            lit += row.count('#')
 
-def countLitPixels(image: List[str]):
-    lit = 0
-    for row in image:
-        lit += row.count('#')
-
-    return lit
+        return lit
 
 
 def partOne(data):
     algo, image = readInput(data)
-    outputImage = enhanceImage(image, algo)
-    outputImage = enhanceImage(outputImage, algo)
-    lit = countLitPixels(outputImage)
+    myImage = Image(image, algo)
+    myImage.enhanceImage()
+    myImage.enhanceImage()
+    lit = myImage.countLitPixels()
     statement = (
         f'{lit} pixels are lit'
     )
     print(statement)
-    for row in outputImage:
-        print(row)
     return lit
 
 
+def partTwo(data):
+    algo, image = readInput(data)
+    myImage = Image(image, algo)
+    for _ in range(50):
+        myImage.enhanceImage()
+    lit = myImage.countLitPixels()
+    statement = (
+        f'{lit} pixels are lit after 50 enhancements'
+    )
+    print(statement)
+    return lit
+
 if __name__ == '__main__':
     partOne('data/data_q20.txt')
+    partTwo('data/data_q20.txt')
