@@ -4,7 +4,7 @@ from io import StringIO
 import copy
 from icecream import ic
 
-
+# TODO: CLEAN THIS! WRITE TESTS!
 class Beacon:
     def __init__(self, position: np.array):
         self.position = position
@@ -57,20 +57,26 @@ class Scanner:
 
     def calculateDistBTBeacons(self):
         self.distBTBeacons = np.array([])
+        self.distBTBeaconDict = {}
         for beacon in self.beacons:
             beacon.D2otherBeacons = np.array([[]])
         for pos1, beacon1 in enumerate(self.beacons):
             for pos2, beacon2 in enumerate(self.beacons[pos1 + 1:]):
-                scannerList = beacon2 - beacon1
+                distance = beacon2 - beacon1
                 beacon1.otherBeacon(beacon2)
                 beacon2.otherBeacon(beacon1)
                 distance = distance ** 2
                 distance = np.sum(distance)
+                distance = int(distance)
                 self.distBTBeacons = np.append(
                     self.distBTBeacons,
                     distance
                 )
-                if distance not in self.distBTBeacons.keys
+                if distance not in self.distBTBeaconDict.keys():
+                    self.distBTBeaconDict[distance] = []
+                self.distBTBeaconDict[distance].append(
+                    (beacon2.position, beacon1.position)
+                )
 
     def shiftLocation(self, newPosition: np.array):
         self.position = newPosition
@@ -98,6 +104,8 @@ def readInput(file) -> List[Scanner]:
             if ',' in line:
                 line = StringIO(line)
                 line = np.loadtxt(line, dtype=int, delimiter=',')
+                if len(line) != 3:
+                    raise Exception('hfdjahkjl')
                 b = Beacon(line)
                 scannerList[-1].addBeacon(b)
     return scannerList
@@ -141,79 +149,77 @@ rotationList = [
     np.array([[0, 0, -1], [0, -1, 0], [-1, 0, 0]]),
 ]
 
-def scannerOverLap(scannerList):
-    overlap = []
 
-    for pos, scanner0 in enumerate(scannerList):
-        scanner0.calculateDistBTBeacons()
-        for scanner1 in scannerList[pos + 1:]:
-            scanner1.calculateDistBTBeacons()
-            local = 0
-            for dist in scanner0.distBTBeacons:
-                if dist in scanner1.distBTBeacons:
-                    local += 1
-            if local >= 66:
-                overlap.append((scanner0, scanner1))
+def scannerOverLap(scanner1: Scanner, scanner2: Scanner):
+    local = 0
+    scanner1.calculateDistBTBeacons()
+    scanner2.calculateDistBTBeacons()
+    for dist in scanner1.distBTBeacons:
+        if dist in scanner2.distBTBeacons:
+            local += 1
+    if local >= 66:
+        numBeacons = len(scanner2.beacons) - 12
+        # print(f'scanners {scanner1} {scanner2} have {local} edges the same')
+        return True, numBeacons
 
-    return overlap
-
-
+    return False, 0
 
 def beaconOverlap(scanner1: Scanner, scanner2: Scanner) -> List:
 
     scanner1.calculateDistBTBeacons()
     scanner2.calculateDistBTBeacons()
-    numOverlaps = 0
-    for dis in scanner1.distBTBeacons:
-        if dis in scanner2.distBTBeacons:
-            numOverlaps += 1
+    offshiftDict = {}
 
-    # a fully connected 12 node graph has 66 edges
-    # ic(numOverlaps)
-    if numOverlaps < 66:
-        return None
+    for dist1, beacons1 in scanner1.distBTBeaconDict.items():
+        for dist2, beacons2 in scanner2.distBTBeaconDict.items():
 
-    for nb1, b11 in enumerate(scanner1.beacons):
-        for b12 in scanner1.beacons[nb1 + 1:]:
-            d1 = np.sum((b11 - b12)**2)
-            d1c = np.count_nonzero(scanner1.distBTBeacons == d1)
-            for nb2, b21 in enumerate(scanner2.beacons):
-                for b22 in scanner2.beacons[nb2 + 1:]:
-                    d2 = np.sum((b21 - b22)**2)
-                    d2c = np.count_nonzero(scanner2.distBTBeacons == d2)
-                    # if d2c != 1 and d1c != 1:
-                    #     continue
-                    # ic(d2c)
-                    if not np.array_equiv(d1, d2):
-                        continue
-
+            if dist1 != dist2:
+                continue
+            for beacon1 in beacons1:
+                for beacon2 in beacons2:
+                    b11 = beacon1[0]
+                    b12 = beacon1[1]
+                    b21 = beacon2[0]
+                    b22 = beacon2[1]
                     if np.array_equiv(b12 - b22, b11 - b21):
                         offshift = b12 - b22
-                        print(f'found it: {offshift} {b11 - b21}')
-                        # ic(f'{b11}, {b12}, {b21}, {b22}')
-                        return offshift
-                    else:
-                        # ic(f'didnt find it; {b12 - b22} {b11 - b21}')
-                        # ic(f'{b11}, {b12}, {b21}, {b22}')
-                        return None
-    return None
+                        if str(offshift) not in offshiftDict.keys():
+                            offshiftDict[str(offshift)] = [offshift, 1]
+                        else:
+                            already = offshiftDict[str(offshift)][1]
+                            offshiftDict[str(offshift)] = [offshift, already + 1]
+    offset = None
+    highest = 0
+    # for key, value in offshiftDict.items():
+    #     # ic(f'{key}: {value[1]}')
+    #     if value[1] >= 12:
+    #         highest = value[1]
+    #         offset = value[0]
+
+    if offshiftDict and len(offshiftDict.keys()) == 1:
+        for offset1 in offshiftDict.values():
+            if offset1[1] > 12:
+                offset = offset1[0]
+ 
+    return offset 
 
 
 def allign_scanners(scannerList: List[Scanner]):
-    overlaps = scannerOverLap(scannerList)
-    ic(f'{overlaps}')
     scanner0__ = copy.deepcopy(scannerList[0])
     scannerList.pop(0)
     foundScanList = [scanner0__]
     i = 0
+    nBeacons = len(scanner0__.beacons)
 
     while len(scannerList) > 0:
         # print(f'scanner 0 sees {len(scanner0_.beacons)} beacons')
         i += 1
         for scanner0 in foundScanList:
-            print(f'scanner {scanner0} being matched to')
+            # print(f'scanner {scanner0} being matched to')
+            scanner0.calculateDistBTBeacons()
             for scanpos, scanner in enumerate(scannerList):
-                if (scanner0, scanner) not in overlaps and (scanner, scanner0) not in overlaps:
+                noverlap, n = scannerOverLap(scanner0, scanner)
+                if not noverlap:
                     continue
                 updated = False
                 # do the rotations
@@ -223,31 +229,34 @@ def allign_scanners(scannerList: List[Scanner]):
                             np.matmul(rotation, beacon.originalPosition)
                             )
                     scanner.calculateDistBTBeacons()
-                    scanner0.calculateDistBTBeacons()
                     offset = beaconOverlap(scanner0, scanner)
                     if offset is not None:
                         print(f'offset is {offset}')
-                        scanner.shiftLocation(scanner.position + offset)
+                        # ic(f'{offset}, {scanner0.position}, {scanner.position}')
+                        scanner.shiftLocation(offset)
                         foundScanList.append(scanner)
                         updated = True
+                        nBeacons += n
                         break
                 # if the scanner has been updated
                 if updated:
                     # we will add beacons to the first
                     # for beacon in scanner:
-                    #     if beacon.position not in scanner0__.beacons:
-                    #         scanner0__.addBeacon(beacon)
+                    #     if not any(np.array_equiv(beacon.position, x.position) for x in scanner0.beacons):
+                    #         scanner0.addBeacon(beacon)
                     print(f'Scanner {scanner.name} is at {scanner.position[0]},{scanner.position[1]},{scanner.position[2]}')
-                    print(f'Scanner {scanner.name} matched to scanner0')
-                    print(f'Scanner 0 now sees {len(scanner0__.beacons)} beacons')
+                    # print(f'Scanner {scanner.name} matched to scanner0')
+                    # print(f'Scanner 0 now sees {len(scanner0__.beacons)} beacons')
                     scannerList.pop(scanpos)
-                    print(f'{len(scannerList)} beacons left')
-                    # break
+                    # print(f'{len(scannerList)} beacons left')
+                    if len(scannerList) == 0:
+                        break
 
         if i > 500:
             ic(f'{scannerList}')
             ic(f'{scanner0}')
             raise Exception('Too many iteration')
+    print(f'{nBeacons} beacons found')
     return foundScanList
 
 
@@ -264,8 +273,19 @@ def countBeacons(scannerList: List[Scanner]) -> int:
 
 from time import sleep
 if __name__ == '__main__':
-    scannerList = readInput('data/data_q19_dummy.txt')
+    scannerList = readInput('data/data_q19.txt')
+    print(len(scannerList))
     aligned = allign_scanners(scannerList)
     known = countBeacons(aligned)
     print(len(known))
+
+    distance = []
+    for pos, scanner1 in enumerate(aligned):
+        for scanner2 in aligned[pos + 1:]:
+            d = scanner1.position - scanner2.position
+            d = np.sum(np.abs(d))
+            distance.append(d)
+
+    print(distance)
+    print(max(distance))
 
