@@ -13,6 +13,6 @@ def test_beaconOverlap():
     scanner0 = scannerList[0]
     scanner1 = scannerList[1]
     overlap = beaconOverlap(scanner0, scanner1)
-    assert len(overlap) == 12
+    assert overlap == None
     
 
