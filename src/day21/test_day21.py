@@ -26,5 +26,5 @@ def test_calcPos():
     assert calcPos(9, 1) == 10
 
 
-# def test_partTwo():
-#     assert partTwo('data/data_q21_dummy.txt') == 444356092776315
+def test_partTwo():
+    assert partTwo('data/data_q21_dummy.txt') == 444356092776315
